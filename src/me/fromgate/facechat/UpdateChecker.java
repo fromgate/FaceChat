@@ -1,10 +1,14 @@
 /*  
  *  UpdateChecker module by fromgate 
  *  (c)2014, fromgate, fromgate@gmail.com
- *      
- *  This file is part of ReActions.
+ *  This class could be used with any bukkit plugin
+ *  that uploaded to BukkitDev. Name of uploaded file must
+ *  named using format: <PluginName> vx.x.x/x
+ *  (For example: FaceChat v0.1.0)
  *  
- *  ReActions is free software: you can redistribute it and/or modify
+ *  This file is part of UpdateChecker.
+ *  
+ *  UpdateChecker is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
@@ -88,6 +92,10 @@ public class UpdateChecker {
      * Default permission (if this method was not used) is: <BukkitDevName>.config (for example: facechat.config)
      * 
      * @param permission
+     * 
+     * Example:
+     *    UpdateChecker.setPermission ("facechat.updateinform");
+     * 
      */
     public static void setPermission (String permission){
     	informPermission = permission;

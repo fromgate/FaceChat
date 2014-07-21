@@ -3,9 +3,9 @@
  *  (c)2014, fromgate, fromgate@gmail.com
  *  http://dev.bukkit.org/bukkit-plugins/facechat/
  *    
- *  This file is part of ReActions.
+ *  This file is part of FaceChat.
  *  
- *  ReActions is free software: you can redistribute it and/or modify
+ *  FaceChat is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
