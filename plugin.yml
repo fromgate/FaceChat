@@ -1,0 +1,10 @@
+name: FaceChat
+main: me.fromgate.facechat.FaceChat
+version: 0.1.0
+author: fromgate, fromgate@gmail.com
+commands:
+   facechat:
+      aliases: [fchat,face]
+      description: 
+      usage: 
+           /facechat <Message>
