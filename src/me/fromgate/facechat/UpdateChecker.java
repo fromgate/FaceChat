@@ -51,13 +51,15 @@ public class UpdateChecker {
     
     /**
      * UpdateChecker initialization 
-     * Example: init(this, "FaceChat", "12345", "facechat", true);
-     * 
+     *  
      * @param plugin           - plugin 
      * @param pluginName       - plugin name (for example: FaceChat)
      * @param projectID        - CurseAPI project id
      * @param bukkitDevName    - bukkit-dev name 
-     * @param enable           - enable (true) update checker  
+     * @param enable           - enable (true) update checker
+     * 
+     * Example: 
+     *    UpdateChecker.init(this, "FaceChat", "12345", "facechat", true);
      * 
      */
     public static void init(JavaPlugin plugin, String pluginName, String projectID, String bukkitDevName, boolean enable){
@@ -98,6 +100,14 @@ public class UpdateChecker {
      * 
      * @param list   - String list containing message
      * if list is empty will filled with default messages
+     * 
+     * Example:
+     *    List<String> list = new ArrayList<String>();
+     *    list.add("&6%plugin% &eis outdated! Recommended version is &6v%newversion%");
+     * 	  list.add("&ePlease download new version from BukkitDev:");
+     *    list.add("&b%url%");
+     *    UpdateChecker.setUpdateMessage(list);
+     * 
      */
     public static void setUpdateMessage(List<String> list){
     	if (list == null||list.isEmpty()){
@@ -114,6 +124,11 @@ public class UpdateChecker {
      * %plugin% %newversion% %oldversion% %url%
      * 
      * @param str   - String list containing message
+     * 
+     * Example:
+     *    UpdateChecker.setUpdateMessage ("&6%plugin% &eis outdated! Recommended version is &6v%newversion%",
+     *               "&ePlease download new version from BukkitDev:","&b%url%");
+     * 
      */
     public static void setUpdateMessage(String... str){
     	List<String>  list = new ArrayList<String>();
@@ -127,6 +142,14 @@ public class UpdateChecker {
      * Show update message for player. You must call this method inside PlayerJoinEvent handler 
      * 
      * @param player
+     * 
+     * Example:
+     * 
+     *    @EventHandler
+	 *    public void onJoin (PlayerJoinEvent event){
+	 *		  UpdateChecker.updateMsg(event.getPlayer());
+	 *    }
+	 *    
      */
     public static void updateMsg (Player player){
         if (isUpdateRequired()&&player.hasPermission(informPermission)){

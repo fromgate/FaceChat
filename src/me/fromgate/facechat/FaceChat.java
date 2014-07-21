@@ -70,6 +70,7 @@ public class FaceChat extends JavaPlugin implements CommandExecutor, Listener {
 	
 	@EventHandler(priority=EventPriority.LOWEST, ignoreCancelled = true)
 	public void onJoin (PlayerJoinEvent event){
+		UpdateChecker.updateMsg(event.getPlayer());
 		if (!messageOnJoin) return;
 		if (!event.getPlayer().hasPermission("facechat.join")) return;
 		List<String> joinMessages = new ArrayList<String>();
