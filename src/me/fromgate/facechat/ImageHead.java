@@ -69,11 +69,15 @@ public class ImageHead {
 	private static String[] chatColors = {"&0","&1","&2","&3","&4","&5","&6","&7","&8","&9","&a","&b","&c","&d","&e","&f"};
 
 
-
 	public static List<String> getAddLine (String sourcePlayer, String message, List<String> mask, int position){
+		return getAddLine (sourcePlayer,message,"", mask, position);
+	}
+
+
+	public static List<String> getAddLine (String sourcePlayer, String message, String chatFormat, List<String> mask, int position){
 		List<String> newLines = new ArrayList<String>();
 		for (String line : mask)
-			newLines.add(line.replace("%player%", sourcePlayer));
+			newLines.add(line.replace("%player%",(chatFormat.isEmpty() ? sourcePlayer : chatFormat.replace("%1$s", sourcePlayer).replace("%2$s", "")).trim()));
 		List<String> textLines = lineToList(message);
 		for (int i = 0;i<8;i++){
 			if (newLines.size()<=i) newLines.add("");
@@ -85,7 +89,7 @@ public class ImageHead {
 	public static void printHeadedMessage(Player player, List<String> messageLines) {
 		printHeadedMessage (player.getName(), messageLines);
 	}
-	
+
 
 	public static void printHeadedMessage(final String player, final List<String> messageLines) {
 		Bukkit.getScheduler().runTaskAsynchronously(FaceChat.getPlugin(), new Runnable(){
@@ -212,6 +216,15 @@ public class ImageHead {
 		}
 
 
+	}
+
+	public static void loadImageToCache(final String name){
+		Bukkit.getScheduler().runTaskAsynchronously(FaceChat.getPlugin(), new Runnable(){
+			@Override
+			public void run() {
+				getCachedImage (name);	
+			}
+		});
 	}
 
 	public static BufferedImage getCachedImage (String name){

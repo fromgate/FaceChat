@@ -25,6 +25,7 @@ package me.fromgate.facechat;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,10 +34,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+@SuppressWarnings("deprecation")
 public class FaceChat extends JavaPlugin implements CommandExecutor, Listener {
 	private static FaceChat instance;
 	public static FaceChat getPlugin() {
@@ -44,20 +46,19 @@ public class FaceChat extends JavaPlugin implements CommandExecutor, Listener {
 	}
 
 	boolean enableUpdateChecker;
-	
+
 	String skinUrl;
 	String separatorLine;
 	boolean messageOnJoin;
 	boolean messageInChat;
 	boolean removeJoinMessage;
-	
 	int cacheLifeTime; 
 	int messageLine;
 	List<String> lineMask;
 	List<String> joinMask;
 	String defaultColor;
+	boolean useEventFormat;
 
-	
 	@Override
 	public void onEnable(){
 		instance = this;
@@ -67,61 +68,64 @@ public class FaceChat extends JavaPlugin implements CommandExecutor, Listener {
 		save();
 		UpdateChecker.init(this, "FaceChat", "82886", "facechat", enableUpdateChecker);
 	}
-	
+
 	@EventHandler(priority=EventPriority.LOWEST, ignoreCancelled = true)
 	public void onJoin (PlayerJoinEvent event){
 		UpdateChecker.updateMsg(event.getPlayer());
-		if (!messageOnJoin) return;
-		if (!event.getPlayer().hasPermission("facechat.join")) return;
-		List<String> joinMessages = new ArrayList<String>();
-		for (String message : this.joinMask)
-			joinMessages.add(message.replace("%player%", event.getPlayer().getName()));
-		ImageHead.printHeadedMessage (event.getPlayer(), joinMessages);
-		if (removeJoinMessage) event.setJoinMessage(null);
-	}
-	
-	
-    @EventHandler(priority=EventPriority.HIGH, ignoreCancelled = true)
-    public void onChat(AsyncPlayerChatEvent event){
-    	if (!messageInChat) return;
-    	if (!event.getPlayer().hasPermission("facechat.chat")) return;
-    	ImageHead.printHeadedMessage (event.getPlayer(), ImageHead.getAddLine(event.getPlayer().getName(), event.getMessage(), this.lineMask, this.messageLine));
-    	event.setCancelled(true);
-    }
+		if (messageOnJoin){
+			if (!event.getPlayer().hasPermission("facechat.join")) return;
+			List<String> joinMessages = new ArrayList<String>();
+			for (String message : this.joinMask)
+				joinMessages.add(message.replace("%player%", event.getPlayer().getName()));
+			ImageHead.printHeadedMessage (event.getPlayer(), joinMessages);
+			if (removeJoinMessage) event.setJoinMessage(null);
+		} else ImageHead.loadImageToCache(event.getPlayer().getName());
 
-    private boolean reloadCfg (CommandSender sender){
-    	if (sender!=null) sender.sendMessage(ChatColor.DARK_GREEN+"FaceChat configuration reloaded!");
-    	load();
-    	return true;
-    }
-    
+	}
+
+
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled = true)
+	public void onChat(PlayerChatEvent event){
+		if (!messageInChat) return;
+		if (!event.getPlayer().hasPermission("facechat.chat")) return;
+		ImageHead.printHeadedMessage (event.getPlayer(), ImageHead.getAddLine(event.getPlayer().getName(), event.getMessage(), event.getFormat(), this.lineMask, this.messageLine));
+		event.setCancelled(true);
+	}
+
+	private boolean reloadCfg (CommandSender sender){
+		if (sender!=null) sender.sendMessage(ChatColor.DARK_GREEN+"FaceChat configuration reloaded!");
+		load();
+		return true;
+	}
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String cmdLabel, String[] args) {
 		if (args.length == 0) return false;
 		Player player = (sender instanceof Player) ? (Player) sender : null;
-		
+
 		if (args[0].equalsIgnoreCase("reload")){
-				if (player==null||player.hasPermission("facechat.reload")) return reloadCfg(sender);
-				else return false;
+			if (player==null||player.hasPermission("facechat.reload")) return reloadCfg(sender);
+			else return false;
 		}
-		
-		
-		if (!player.hasPermission("facechat.command")) return false;
-		String playerName = player.getName();
-		
+
+
+		if (player!=null&&!player.hasPermission("facechat.command")) return false;
+
+		String playerName = player == null ? "" : player.getName();
+
 		String message = "";
 		for (int i = 0; i<args.length; i++){
 			if (i==0) {
 				if (args[0].toLowerCase().startsWith("player:")&&args[0].length()>7){
-					if (player.hasPermission("facechat.command.player")) playerName = args[0].substring(7); 
+					if (player==null||player.hasPermission("facechat.command.player")) playerName = args[0].substring(7); 
 				} else message = args[0];
 			}
 			message = i==0 ? message : message+" "+args[i];
 		}
-			ImageHead.printHeadedMessage (playerName, ImageHead.getAddLine(player.getName(),message.trim(), this.lineMask, this.messageLine));
+		ImageHead.printHeadedMessage (playerName, ImageHead.getAddLine(player == null ? "" : player.getName(), message.trim(), this.lineMask, this.messageLine));
 		return true;
 	}
-	
+
 	public void save(){
 		getConfig().set("general.check-updates",enableUpdateChecker);
 		getConfig().set("face.skin-url",skinUrl);
@@ -136,13 +140,13 @@ public class FaceChat extends JavaPlugin implements CommandExecutor, Listener {
 		getConfig().set("face.join.message",joinMask);
 		saveConfig();
 	}
-	
+
 	public void load(){
 		reloadConfig();
 		enableUpdateChecker = getConfig().getBoolean("general.check-updates",true);
-		skinUrl = getConfig().getString("face.skin-url","http://s3.amazonaws.com/MinecraftSkins/");
+		skinUrl = getConfig().getString("face.skin-url","http://skins.minecraft.net/MinecraftSkins/"); //http://s3.amazonaws.com/MinecraftSkins/
 		separatorLine = getConfig().getString("face.separator","&8++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-		cacheLifeTime = getConfig().getInt("face.cache-lifetime-(minutes)",30);
+		cacheLifeTime = getConfig().getInt("face.cache-lifetime-(minutes)",60);
 		defaultColor = getConfig().getString("face.default-color","&e");
 		lineMask = getConfig().getStringList("face.chat.message");
 		messageInChat = getConfig().getBoolean("face.chat.enable-for-chat-messages",false);
@@ -174,5 +178,5 @@ public class FaceChat extends JavaPlugin implements CommandExecutor, Listener {
 		}
 	}
 
-    
+
 }
